@@ -14,26 +14,48 @@ par(mfrow = c(1, 2), mar = c(4, 4, 3, 0))
 hist(rnumbers, col = "green", xlab = "Number", freq = FALSE,
      main = "1,000 Random Exponential Numbers")
 abline(v = mean(rnumbers), col = "red", lwd = 4)
-text(6, 400, labels = "Red Line is Mean", pos = 4, cex = 2, col = "red")
 x.num <- seq(0, 50, length.out=100)
 y.num <- dnorm(x.num, mean(rnumbers), sd(rnumbers))
 lines(x.num, y.num, col = "blue", lwd = 2, lty = 2)
-
+legend("topright", legend = c("Mean", "Density Curve"), col = c("red", "blue"),
+       lty = 1:2)
+       
 hist(rmeans, col = "yellow", xlab = "Number", freq = FALSE,
      main = "1,000 Means of 40 Random Exponential Numbers")
 abline(v = mean(rmeans), col = "red", lwd = 4)
-text(5.5, 200, labels = "Red Line is Mean", pos = 4, cex = 2, col = "red")
 x.mean <- seq(2, 8, length.out=10)
 y.mean <- dnorm(x.mean, mean(rmeans), sd(rmeans))
 lines(x.mean, y.mean, col = "blue", lwd = 2, lty = 2)
 
 means <- data.frame("Dataset" = c("1,000 Numbers", "1,000 Means"), 
-                    "Value" = c(mean(rnumbers), mean(rmeans)))
+                    "Mean" = c(mean(rnumbers), mean(rmeans)))
 print(means)
 
 #comparing variances
+par(mfrow = c(1, 2), mar = c(4, 4, 3, 0))
+hist(rnumbers, col = "green", xlab = "Number", freq = FALSE,
+     main = "1,000 Random Exponential Numbers")
+abline(v = mean(rnumbers), col = "red", lwd = 4)
+x.num <- seq(0, 50, length.out=100)
+y.num <- dnorm(x.num, mean(rnumbers), sd(rnumbers))
+lines(x.num, y.num, col = "blue", lwd = 2, lty = 2)
+legend("topright", legend = c("Mean", "Density Curve", "Stadard Deviation"), 
+       col = c("red", "blue", "purple"), lty = c(1, 2, 2))
+abline(v = mean(rnumbers) - sd(rnumbers), col = "purple", lwd = 4, lty = 2)
+abline(v = mean(rnumbers) + sd(rnumbers), col = "purple", lwd = 4, lty = 2)
 
+hist(rmeans, col = "yellow", xlab = "Number", freq = FALSE,
+     main = "1,000 Means of 40 Random Exponential Numbers")
+abline(v = mean(rmeans), col = "red", lwd = 4)
+x.mean <- seq(2, 8, length.out=10)
+y.mean <- dnorm(x.mean, mean(rmeans), sd(rmeans))
+lines(x.mean, y.mean, col = "blue", lwd = 2, lty = 2)
+abline(v = mean(rmeans) - sd(rmeans), col = "purple", lwd = 4, lty = 2)
+abline(v = mean(rmeans) + sd(rmeans), col = "purple", lwd = 4, lty = 2)
 
+sds <- data.frame("Dataset" = c("1,000 Numbers", "1,000 Means"), 
+                  "Standard Deviation" = c(sd(rnumbers), sd(rmeans)))
+print(sds)
 
 
 
