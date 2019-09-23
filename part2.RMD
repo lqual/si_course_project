@@ -1,0 +1,61 @@
+---
+title: "Effects of Vitamin C on Tooth Growth"
+author: "Lucas Qualmann"
+date: "9/23/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Overview
+
+This report utilized the dataset ToothGrowth in R to look at the effects of Vitamin C on toothgrowth for guineau pigs.
+
+## Summary
+
+From the R help page, the data contains 60 observations on 3 variables: len, supp, and dose.  Len is the tooth length of the guineau pig, supp is the supplement type, and dose is the dose in milligrams/day.  The supplement type is either OJ (orange juice) or VC (acorbic acid).  The dose of the supplement is either 0.5, 1.0, or 2.0 milligrams/day.
+
+```{r}
+#summary
+stats <- data.frame("Statistic" = c("Mean", "Median", "Min", "Max", "SD"), 
+                   "Tooth_Length" = c(mean(ToothGrowth$len), 
+                                      median(ToothGrowth$len), 
+                                      min(ToothGrowth$len),
+                                      max(ToothGrowth$len),
+                                      sd(ToothGrowth$len)))
+print(stats)
+```
+
+The table above shows the basic summary statistics on the length of the teeth measured in the dataset, not broken out by any of the other variables.  The mean of 18.81 is slightly below the mediam of 19.25.  The range of lengths is 4.2 to 33.9.  Finally, the standard deviation is 7.65.
+
+Now let's break down the data in terms of supplement type and dosage type.  To do this, we'll make two plots showing the values of tooth length by supplement type and dosage type.
+
+```{r}
+par(mfrow = c(1, 2), mar = c(4, 4, 3, 0))
+plot(ToothGrowth$supp,ToothGrowth$len, col = "purple", xlab = "Supplement Type", 
+     ylab = "Tooth Length", main = "Tooth Length by Supplement Type")
+plot(ToothGrowth$dose,ToothGrowth$len, 
+     col = rgb(red = 1, green = 1, blue = 0, alpha = 0.5), xlab = "Dosage", 
+     ylab = "Tooth Length", main = "Tooth Length by Dosage Type", pch = 19,
+     cex = 2)
+```
+
+The first plot shows OJ showing a higher average tooth length than VC, but the large range of VC values do call into question whether or not supplement type is a major factor for tooth growth.  The dosage plot, on the other hand, does seem to show a higher dosage resulting in more tooth growth.
+
+## Delivery Method Effects
+
+## Dose Effects
+
+## Conclusions
+
+# Appendix
+
+## R Code
+
+## R Session Info
+
+```{r}
+print(sessionInfo())
+```
