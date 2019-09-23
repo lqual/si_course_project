@@ -1,7 +1,3 @@
-#simulation for 1000 random exponentials
-set.seed(1000)
-rnumbers <- rexp(1000, 0.2)
-
 #simulation for 1000 averages of 40 random exponentials
 set.seed(4000)
 rmeans = NULL
@@ -10,51 +6,38 @@ for(i in 1:1000) {
 }
 
 #comparing means of simulations
-par(mfrow = c(1, 2), mar = c(4, 4, 3, 0))
-hist(rnumbers, col = "green", xlab = "Number", freq = FALSE,
-     main = "1,000 Random Exponential Numbers")
-abline(v = mean(rnumbers), col = "red", lwd = 4)
-x.num <- seq(0, 50, length.out=100)
-y.num <- dnorm(x.num, mean(rnumbers), sd(rnumbers))
-lines(x.num, y.num, col = "blue", lwd = 2, lty = 2)
-legend("topright", legend = c("Mean", "Density Curve"), col = c("red", "blue"),
-       lty = 1:2)
-       
+par(mar = c(4,4,2,1))
 hist(rmeans, col = "yellow", xlab = "Number", freq = FALSE,
      main = "1,000 Means of 40 Random Exponential Numbers")
-abline(v = mean(rmeans), col = "red", lwd = 4)
+abline(v = mean(rmeans), col = "red", lwd = 2)
+abline(v = 1/0.2, col = "green", lwd = 2, lty = 2)
 x.mean <- seq(2, 8, length.out=100)
 y.mean <- dnorm(x.mean, mean(rmeans), sd(rmeans))
 lines(x.mean, y.mean, col = "blue", lwd = 2, lty = 2)
+legend("topright", legend = c("Simulation Mean", "Theoretical Mean", 
+                              "Density Curve"), 
+       col = c("red", "green", "blue"), lwd = c(1, 2, 2), lty = c(1, 2, 2))
 
-means <- data.frame("Dataset" = c("1,000 Numbers", "1,000 Means"), 
-                    "Mean" = c(mean(rnumbers), mean(rmeans)))
+means <- data.frame("Statistic" = c("Theoretical Mean", "Simulation Mean"), 
+                    "Mean" = c(1/0.2, mean(rmeans)))
 print(means)
 
 #comparing variances
-par(mfrow = c(1, 2), mar = c(4, 4, 3, 0))
-hist(rnumbers, col = "green", xlab = "Number", freq = FALSE,
-     main = "1,000 Random Exponential Numbers")
-abline(v = mean(rnumbers), col = "red", lwd = 4)
-x.num <- seq(0, 50, length.out=100)
-y.num <- dnorm(x.num, mean(rnumbers), sd(rnumbers))
-lines(x.num, y.num, col = "blue", lwd = 2, lty = 2)
-legend("topright", legend = c("Mean", "Density Curve", "Stadard Deviation"), 
-       col = c("red", "blue", "purple"), lty = c(1, 2, 2))
-abline(v = mean(rnumbers) - sd(rnumbers), col = "purple", lwd = 4, lty = 2)
-abline(v = mean(rnumbers) + sd(rnumbers), col = "purple", lwd = 4, lty = 2)
-
-hist(rmeans, col = "yellow", xlab = "Number", freq = FALSE,
+hist(rmeans, col = "yellow", xlab = "Number", freq = FALSE, xlim = c(0, 10),
      main = "1,000 Means of 40 Random Exponential Numbers")
-abline(v = mean(rmeans), col = "red", lwd = 4)
 x.mean <- seq(2, 8, length.out=100)
 y.mean <- dnorm(x.mean, mean(rmeans), sd(rmeans))
 lines(x.mean, y.mean, col = "blue", lwd = 2, lty = 2)
-abline(v = mean(rmeans) - sd(rmeans), col = "purple", lwd = 4, lty = 2)
-abline(v = mean(rmeans) + sd(rmeans), col = "purple", lwd = 4, lty = 2)
+abline(v = mean(rmeans) - sd(rmeans), col = "red", lwd = 2, lty = 2)
+abline(v = mean(rmeans) + sd(rmeans), col = "red", lwd = 2, lty = 2)
+abline(v = 1/0.2 - 1/0.2, col = "green", lwd = 2, lty = 2)
+abline(v = 1/0.2 + 1/0.2, col = "green", lwd = 2, lty = 2)
+legend("topright", legend = c("Simulation SD", "Theoretical SD", 
+                              "Density Curve"), 
+       col = c("red", "green", "blue"), lwd = c(1, 2, 2), lty = c(1, 2, 2))
 
-sds <- data.frame("Dataset" = c("1,000 Numbers", "1,000 Means"), 
-                  "Standard Deviation" = c(sd(rnumbers), sd(rmeans)))
+sds <- data.frame("Statistic" = c("Theoretical Mean", "Simulation Mean"), 
+                  "Standard Deviation" = c(1/0.2, sd(rmeans)))
 print(sds)
 
 #prove normal distribution
