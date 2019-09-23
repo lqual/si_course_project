@@ -2,7 +2,9 @@
 title: "Effects of Vitamin C on Tooth Growth"
 author: "Lucas Qualmann"
 date: "9/23/2019"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -11,7 +13,7 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ## Overview
 
-This report utilized the dataset ToothGrowth in R to look at the effects of Vitamin C on toothgrowth for guineau pigs.
+This report utilized the dataset ToothGrowth in R to look at the effects of Vitamin C on toothgrowth for guineau pigs.  The analysis shows the type of supplement does not have a statistically significant impact on tooth length, but the dosage rate does have a statistically significant impact on tooth length.
 
 ## Summary
 
@@ -32,7 +34,7 @@ The table above shows the basic summary statistics on the length of the teeth me
 
 Now let's break down the data in terms of supplement type and dosage type.  To do this, we'll make two plots showing the values of tooth length by supplement type and dosage type.
 
-```{r}
+```{r, fig.width=10}
 par(mfrow = c(1, 2), mar = c(4, 4, 3, 0))
 plot(ToothGrowth$supp,ToothGrowth$len, col = "purple", xlab = "Supplement Type", 
      ylab = "Tooth Length", main = "Tooth Length by Supplement Type")
@@ -42,20 +44,166 @@ plot(ToothGrowth$dose,ToothGrowth$len,
      cex = 2)
 ```
 
-The first plot shows OJ showing a higher average tooth length than VC, but the large range of VC values do call into question whether or not supplement type is a major factor for tooth growth.  The dosage plot, on the other hand, does seem to show a higher dosage resulting in more tooth growth.
+The first plot shows OJ having a higher average tooth length than VC, but the large range of VC values do call into question whether or not supplement type is a major factor for tooth growth.  The dosage plot, on the other hand, does seem to show a higher dosage resulting in more tooth growth.
 
 ## Delivery Method Effects
 
+First we want to look at whether or not the delivery method has an impact on tooth length.  Our first analysis will be to look at the density plots of OJ and VC supplement type to get an idea as to whether or not it looks like there is an impact.
+
+```{r, message=FALSE}
+par(mfrow = c(1, 1), mar = c(4,4,2,1))
+library(dplyr)
+oj <- ToothGrowth %>% select(len, supp) %>% filter(supp == "OJ") %>% pull(len)
+vc <- ToothGrowth %>% select(len, supp) %>% filter(supp == "VC") %>% pull(len)
+plot(density(oj), col = "orange", lwd = 4, xlab = "Tooth Length", 
+     main = "Density of Tooth Length Impact by Supplement Type")
+lines(density(vc), col = "blue", lwd = 4)
+legend("topright", legend = c("OJ", "VC"), 
+       col = c("orange", "blue"), lwd = 4)
+```
+
+The above chart shows that the two supplement distributions overlap quite a bit.  This chart would support the null hypothesis that there isn't much of an impact caused by the supplement type.  To make sure this is correct, we will run a t.test.
+
+```{r}
+ptype <- t.test(oj, vc, paired = FALSE, var.equal = TRUE, 
+                data = ToothGrowth)$p.value
+ctype <- t.test(oj, vc, paired = FALSE, var.equal = TRUE, 
+                data = ToothGrowth)$conf
+typestats <- data.frame("Statistic" = c("P-Value", "Conf.Level"), 
+                    "Low_Value" = c(ptype, ctype[1]), 
+                    "High_Value" = c(NA, ctype[2]))
+print(typestats)
+```
+
+The main items we are looking for on the t.test is the p-value and the 95% confidence interval.  The p-value tells us the probability of the data occuring assuming the null hypothesis (no effect) is correct.  The p-value needs to be less than 5% in order for us to reject the null hypothesis.  In addition, the 95% confidence interval also lets us know if we should accept or reject the null hypothesis.  If the 95% confidence interval contains 0, that is a sign that we should accept the null hypothesis.  If the interval doesn't contain 0, we should reject it.  Since the t.test shows the p-value is above 5% and the 95% confidence interval contains 0, the null hypothesis of the type of supplement not making an impact is accepted.
+
 ## Dose Effects
 
+Next, we want to look at whether or not the dose of vitamin C has an impact on tooth length.  Our first analysis will be to look at the density plots of the three rates to get an idea as to whether or not it looks like there is an impact.
+
+```{r}
+#dose effects
+d5 <- ToothGrowth %>% select(len, dose) %>% filter(dose == 0.5) %>% pull(len)
+d1 <- ToothGrowth %>% select(len, dose) %>% filter(dose == 1) %>% pull(len)
+d2 <- ToothGrowth %>% select(len, dose) %>% filter(dose == 2) %>% pull(len)
+plot(density(d5), col = "red", lwd = 4, xlab = "Tooth Length", ylim = c(0, .12),
+     main = "Density of Tooth Length Impact by Dosage Rate", xlim = c(0, 40))
+lines(density(d1), col = "blue", lwd = 4)
+lines(density(d2), col = "green", lwd = 4)
+legend("topright", legend = c("0.5", "1.0", "2.0"), 
+       col = c("red", "blue", "green"), lwd = 4)
+```
+
+The plot does suggest a relationship between dosage rate and tooth length.  As the dosage rate increases, tooth length increases as well.  In addition, there is not a lot of overlap between the densities of the 3 rates.  This is especially obvious when looking at the difference between 0.5 and 2.0 milligrams per day.  Based on the chart, it looks like we should reject the null hypothesis of dosage rate not affecting the tooth length.  Let's run some t.tests to verify.  We'll need to run a t.test 3 times for every combination of rates since we can only compare 2 rates at a time.
+
+```{r}
+prate1 <- t.test(d5, d1, paired = FALSE, var.equal = TRUE, 
+                data = ToothGrowth)$p.value
+crate1 <- t.test(d5, d1, paired = FALSE, var.equal = TRUE, 
+                data = ToothGrowth)$conf
+prate2 <- t.test(d5, d2, paired = FALSE, var.equal = TRUE, 
+                 data = ToothGrowth)$p.value
+crate2 <- t.test(d5, d2, paired = FALSE, var.equal = TRUE, 
+                 data = ToothGrowth)$conf
+prate3 <- t.test(d1, d2, paired = FALSE, var.equal = TRUE, 
+                 data = ToothGrowth)$p.value
+crate3 <- t.test(d1, d2, paired = FALSE, var.equal = TRUE, 
+                 data = ToothGrowth)$conf
+
+ratestats <- data.frame("Statistic" = c("P-Value (.5-1)", "Conf.Level (.5-1)", 
+                                        "P-Value (.5-2)", "Conf.Level (.5-2)",
+                                        "P-Value (1-2)", "Conf.Level (1-2)"), 
+                        "Low_Value" = c(prate1, crate1[1], prate2, crate2[1], 
+                                        prate3, crate3[1]), 
+                        "High_Value" = c(NA, crate1[2], NA, crate2[2], 
+                                         NA, crate3[2]))
+print(ratestats)
+```
+
+The t.tests confirm our hypothesis of dosage rate making an impact.  All of the p-values are well below our 5% threshold, and none of the 95% confidence intervals contain 0.  This means we can reject the null hypothesis and accept the alternative hypothesis that dosage rate affects tooth length.
+
 ## Conclusions
+
+The conclusions that we are able to draw from our analysis is the supplement type of orange juice or ascorbic acid does not have a statistically significant impact on tooth length.  However, we have shown that dosage rate of vitamin C does have a statistically significant impact.  The impact is the higher the dosage rate, the more tooth length there is.  These conclusions are based on the assumption of the observations being independent of each other.
 
 # Appendix
 
 ## R Code
 
+```{r, eval=FALSE, echo=TRUE}
+#summary
+stats <- data.frame("Statistic" = c("Mean", "Median", "Min", "Max", "SD"), 
+                   "Tooth_Length" = c(mean(ToothGrowth$len), 
+                                      median(ToothGrowth$len), 
+                                      min(ToothGrowth$len),
+                                      max(ToothGrowth$len),
+                                      sd(ToothGrowth$len)))
+print(stats)
+
+par(mfrow = c(1, 2), mar = c(4, 4, 3, 0))
+plot(ToothGrowth$supp,ToothGrowth$len, col = "purple", xlab = "Supplement Type", 
+     ylab = "Tooth Length", main = "Tooth Length by Supplement Type")
+plot(ToothGrowth$dose,ToothGrowth$len, 
+     col = rgb(red = 1, green = 1, blue = 0, alpha = 0.5), xlab = "Dosage", 
+     ylab = "Tooth Length", main = "Tooth Length by Dosage Type", pch = 19,
+     cex = 2)
+
+par(mfrow = c(1, 1), mar = c(4,4,2,1))
+library(dplyr)
+oj <- ToothGrowth %>% select(len, supp) %>% filter(supp == "OJ") %>% pull(len)
+vc <- ToothGrowth %>% select(len, supp) %>% filter(supp == "VC") %>% pull(len)
+plot(density(oj), col = "orange", lwd = 4, xlab = "Tooth Length", 
+     main = "Density of Tooth Length Impact by Supplement Type")
+lines(density(vc), col = "blue", lwd = 4)
+legend("topright", legend = c("OJ", "VC"), 
+       col = c("orange", "blue"), lwd = 4)
+
+ptype <- t.test(oj, vc, paired = FALSE, var.equal = TRUE, 
+                data = ToothGrowth)$p.value
+ctype <- t.test(oj, vc, paired = FALSE, var.equal = TRUE, 
+                data = ToothGrowth)$conf
+typestats <- data.frame("Statistic" = c("P-Value", "Conf.Level"), 
+                    "Low_Value" = c(ptype, ctype[1]), 
+                    "High_Value" = c(NA, ctype[2]))
+print(typestats)
+
+#dose effects
+d5 <- ToothGrowth %>% select(len, dose) %>% filter(dose == 0.5) %>% pull(len)
+d1 <- ToothGrowth %>% select(len, dose) %>% filter(dose == 1) %>% pull(len)
+d2 <- ToothGrowth %>% select(len, dose) %>% filter(dose == 2) %>% pull(len)
+plot(density(d5), col = "red", lwd = 4, xlab = "Tooth Length", ylim = c(0, .12),
+     main = "Density of Tooth Length Impact by Dosage Rate", xlim = c(0, 40))
+lines(density(d1), col = "blue", lwd = 4)
+lines(density(d2), col = "green", lwd = 4)
+legend("topright", legend = c("0.5", "1.0", "2.0"), 
+       col = c("red", "blue", "green"), lwd = 4)
+
+prate1 <- t.test(d5, d1, paired = FALSE, var.equal = TRUE, 
+                data = ToothGrowth)$p.value
+crate1 <- t.test(d5, d1, paired = FALSE, var.equal = TRUE, 
+                data = ToothGrowth)$conf
+prate2 <- t.test(d5, d2, paired = FALSE, var.equal = TRUE, 
+                 data = ToothGrowth)$p.value
+crate2 <- t.test(d5, d2, paired = FALSE, var.equal = TRUE, 
+                 data = ToothGrowth)$conf
+prate3 <- t.test(d1, d2, paired = FALSE, var.equal = TRUE, 
+                 data = ToothGrowth)$p.value
+crate3 <- t.test(d1, d2, paired = FALSE, var.equal = TRUE, 
+                 data = ToothGrowth)$conf
+
+ratestats <- data.frame("Statistic" = c("P-Value (.5-1)", "Conf.Level (.5-1)", 
+                                        "P-Value (.5-2)", "Conf.Level (.5-2)",
+                                        "P-Value (1-2)", "Conf.Level (1-2)"), 
+                        "Low_Value" = c(prate1, crate1[1], prate2, crate2[1], 
+                                        prate3, crate3[1]), 
+                        "High_Value" = c(NA, crate1[2], NA, crate2[2], 
+                                         NA, crate3[2]))
+print(ratestats)
+```
+
+
 ## R Session Info
 
-```{r}
+```{r, echo=TRUE}
 print(sessionInfo())
 ```
